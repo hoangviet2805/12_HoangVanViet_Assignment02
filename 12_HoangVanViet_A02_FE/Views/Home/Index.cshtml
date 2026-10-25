@@ -1,0 +1,115 @@
+@model IEnumerable<_12_HoangVanViet_A02_FE.Models.NewsArticle>
+
+@{
+    ViewData["Title"] = "Public News";
+}
+
+<div class="card border-0 shadow-sm rounded-4 mb-4" style="border: 1px solid #e5e7eb !important;">
+    <div class="card-body p-4 p-md-5">
+        <div class="d-flex justify-content-between align-items-start mb-4 flex-column flex-md-row">
+            <div>
+                <h1 class="display-6 fw-bold mb-2 text-dark" style="letter-spacing: -0.5px;">Welcome to FU News Portal</h1>
+                <p class="text-secondary mb-0" style="font-size: 0.95rem;">Stay updated with the latest university announcements, academic research, student activities, and alumni achievements.</p>
+            </div>
+            <div class="mt-3 mt-md-0">
+                <span class="badge rounded-pill px-3 py-2 fw-medium shadow-sm text-white" style="font-size: 0.9rem; background-color: #3b82f6 !important;">
+                    <i class="bi bi-file-earmark-text me-1"></i> @(Model?.Count() ?? 0) Articles Available
+                </span>
+            </div>
+        </div>
+
+        <form asp-action="Index" method="get" class="row g-3 align-items-center">
+            <div class="col-md-7">
+                <div class="input-group input-group-lg border rounded-3 overflow-hidden shadow-sm" style="border-color: #e5e7eb !important;">
+                    <span class="input-group-text bg-white border-0 ps-3 pe-2 text-muted"><i class="bi bi-search"></i></span>
+                    <input type="text" name="searchString" value="@ViewBag.SearchString" class="form-control border-0 ps-2" placeholder="Search by title, headline or content..." style="box-shadow: none; font-size: 0.95rem;">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <select name="categoryId" class="form-select form-select-lg border rounded-3 shadow-sm text-secondary" style="border-color: #e5e7eb !important; font-size: 0.95rem;">
+                    <option value="">-- All Categories --</option>
+                    @if (ViewBag.Categories != null)
+                    {
+                        foreach (var category in ViewBag.Categories)
+                        {
+                            if (ViewBag.CategoryId != null && ViewBag.CategoryId == category.CategoryID)
+                            {
+                                <option value="@category.CategoryID" selected>@category.CategoryName</option>
+                            }
+                            else
+                            {
+                                <option value="@category.CategoryID">@category.CategoryName</option>
+                            }
+                        }
+                    }
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary btn-lg w-100 rounded-3 shadow-sm fw-medium d-flex align-items-center justify-content-center gap-2" style="background-color: #4f46e5; border-color: #4f46e5; font-size: 0.95rem;">
+                    <i class="bi bi-funnel"></i> Filter
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="row g-4">
+    @if (Model != null && Model.Any())
+    {
+        foreach (var article in Model)
+        {
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm border-0 rounded-4 p-2 transition-hover" style="border: 1px solid #e5e7eb !important;">
+                    <div class="card-body p-3 d-flex flex-column">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="badge text-primary bg-primary bg-opacity-10 rounded-pill px-3 py-2 border border-primary border-opacity-25 fw-medium">
+                                <i class="bi bi-folder2-open me-1"></i> @(article.Category?.CategoryName ?? "General")
+                            </span>
+                            <small class="text-secondary fw-medium"><i class="bi bi-calendar3 me-1"></i> @article.CreatedDate?.ToString("MM/dd/yyyy")</small>
+                        </div>
+                        <h5 class="card-title fw-bold text-dark mb-2" style="line-height: 1.4;">@article.NewsTitle</h5>
+                        <p class="card-text text-secondary mb-4" style="font-size: 0.9rem; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
+                            @article.NewsContent
+                        </p>
+                        
+                        <!-- Tags -->
+                        <div class="mb-4 d-flex flex-wrap gap-2">
+                            @if(article.NewsTags != null && article.NewsTags.Any())
+                            {
+                                foreach(var nt in article.NewsTags)
+                                {
+                                    <span class="badge bg-light text-secondary border px-2 py-1 fw-normal" style="font-size: 0.75rem;">#@nt.Tag?.TagName</span>
+                                }
+                            }
+                        </div>
+
+                        <div class="mt-auto d-flex justify-content-between align-items-center pt-3 border-top" style="border-color: #f3f4f6 !important;">
+                            <div class="d-flex align-items-center gap-2 text-secondary">
+                                <i class="bi bi-person text-secondary"></i>
+                                <span class="fw-medium" style="font-size: 0.85rem;">@(article.CreatedBy?.AccountName ?? "Unknown")</span>
+                            </div>
+                            <a asp-controller="Home" asp-action="Details" asp-route-id="@article.NewsArticleID" class="btn btn-outline-primary rounded-pill px-4 py-1 fw-medium" style="font-size: 0.85rem;">Read More &rarr;</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="col-12 text-center py-5">
+            <i class="bi bi-newspaper display-1 text-muted mb-3 opacity-25"></i>
+            <h4 class="text-secondary">No news articles available at the moment.</h4>
+        </div>
+    }
+</div>
+
+<style>
+    .transition-hover {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .transition-hover:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+    }
+</style>

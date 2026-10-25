@@ -1,0 +1,260 @@
+@model IEnumerable<_12_HoangVanViet_A02_FE.Models.NewsArticle>
+
+@{
+    ViewData["Title"] = "Manage News Articles";
+    var categories = ViewBag.Categories as List<_12_HoangVanViet_A02_FE.Models.Category>;
+    var tags = ViewBag.Tags as List<_12_HoangVanViet_A02_FE.Models.Tag>;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>My News Articles History</h2>
+    <button class="btn btn-success" onclick="openCreateModal()">
+        <i class="bi bi-plus-circle"></i> Create New Article
+    </button>
+</div>
+
+<table class="table table-striped table-hover mt-4">
+    <thead class="table-dark">
+        <tr>
+            <th>ID</th>
+            <th>Title</th>
+            <th>Created Date</th>
+            <th>Category</th>
+            <th>Status</th>
+            <th class="text-center">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null && Model.Any())
+        {
+            foreach (var article in Model)
+            {
+                <tr>
+                    <td>@article.NewsArticleID</td>
+                    <td>@article.NewsTitle</td>
+                    <td>@article.CreatedDate?.ToString("yyyy-MM-dd HH:mm")</td>
+                    <td>@(article.Category?.CategoryName ?? "Unknown")</td>
+                    <td>
+                        @if (article.NewsStatus == true)
+                        {
+                            <span class="badge bg-success">Active</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">Inactive</span>
+                        }
+                    </td>
+                    <td class="text-center">
+                        <button class="btn btn-sm btn-primary" onclick="openEditModal('@article.NewsArticleID')">Edit</button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteArticle('@article.NewsArticleID')">Delete</button>
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="6" class="text-center">No articles found.</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<!-- Article Modal -->
+<div class="modal fade" id="articleModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalTitle">Create Article</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="articleForm">
+            <div class="row">
+                <div class="col-md-6 mb-3" id="articleIdContainer">
+                    <label class="form-label">Article ID</label>
+                    <input type="text" class="form-control" id="NewsArticleID" maxlength="20">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Category</label>
+                    <select class="form-select" id="CategoryID" required>
+                        <option value="">-- Select Category --</option>
+                        @if(categories != null)
+                        {
+                            foreach(var cat in categories)
+                            {
+                                <option value="@cat.CategoryID">@cat.CategoryName</option>
+                            }
+                        }
+                    </select>
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">Title</label>
+                <input type="text" class="form-control" id="NewsTitle" required maxlength="400">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Headline</label>
+                <input type="text" class="form-control" id="Headline" required maxlength="150">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Content</label>
+                <textarea class="form-control" id="NewsContent" rows="4" maxlength="4000"></textarea>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Source</label>
+                <input type="text" class="form-control" id="NewsSource" maxlength="400">
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">Tags</label>
+                <select multiple class="form-select" id="NewsTags" style="height: 100px;">
+                    @if(tags != null)
+                    {
+                        foreach(var tag in tags)
+                        {
+                            <option value="@tag.TagID">@tag.TagName</option>
+                        }
+                    }
+                </select>
+                <small class="text-muted">Hold Ctrl (Windows) or Command (Mac) to select multiple tags.</small>
+            </div>
+
+            <div class="mb-3 form-check">
+                <input type="checkbox" class="form-check-input" id="NewsStatus">
+                <label class="form-check-label">Is Active</label>
+            </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" onclick="saveArticle()">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+@section Scripts {
+    <script>
+        let isEditMode = false;
+        const modal = new bootstrap.Modal(document.getElementById('articleModal'));
+
+        function openCreateModal() {
+            isEditMode = false;
+            document.getElementById('modalTitle').innerText = 'Create Article';
+            document.getElementById('articleForm').reset();
+            document.getElementById('articleIdContainer').style.display = 'none';
+            document.getElementById('NewsArticleID').value = '';
+            document.getElementById('NewsStatus').checked = true;
+            modal.show();
+        }
+
+        function openEditModal(id) {
+            isEditMode = true;
+            document.getElementById('modalTitle').innerText = 'Edit Article';
+            document.getElementById('articleIdContainer').style.display = 'block';
+            document.getElementById('NewsArticleID').readOnly = true;
+            
+            $.get('/NewsArticles/GetArticle/' + id, function (data) {
+                document.getElementById('NewsArticleID').value = data.newsArticleID;
+                document.getElementById('CategoryID').value = data.categoryID;
+                document.getElementById('NewsTitle').value = data.newsTitle;
+                document.getElementById('Headline').value = data.headline;
+                document.getElementById('NewsContent').value = data.newsContent;
+                document.getElementById('NewsSource').value = data.newsSource;
+                document.getElementById('NewsStatus').checked = data.newsStatus;
+                
+                // Set multi-select tags
+                const tagSelect = document.getElementById('NewsTags');
+                for (let i = 0; i < tagSelect.options.length; i++) {
+                    tagSelect.options[i].selected = false;
+                }
+                if (data.newsTags && data.newsTags.length > 0) {
+                    data.newsTags.forEach(nt => {
+                        for (let i = 0; i < tagSelect.options.length; i++) {
+                            if (tagSelect.options[i].value == nt.tagID) {
+                                tagSelect.options[i].selected = true;
+                            }
+                        }
+                    });
+                }
+                modal.show();
+            }).fail(function() {
+                Swal.fire('Error', 'Could not load article data', 'error');
+            });
+        }
+
+        function saveArticle() {
+            if(!document.getElementById('articleForm').checkValidity()){
+                document.getElementById('articleForm').reportValidity();
+                return;
+            }
+
+            // Get selected tags
+            const tagSelect = document.getElementById('NewsTags');
+            const selectedTags = [];
+            for (let i = 0; i < tagSelect.options.length; i++) {
+                if (tagSelect.options[i].selected) {
+                    selectedTags.push({
+                        newsArticleID: document.getElementById('NewsArticleID').value,
+                        tagID: parseInt(tagSelect.options[i].value)
+                    });
+                }
+            }
+
+            const data = {
+                newsArticleID: document.getElementById('NewsArticleID').value,
+                newsTitle: document.getElementById('NewsTitle').value,
+                headline: document.getElementById('Headline').value,
+                newsContent: document.getElementById('NewsContent').value,
+                newsSource: document.getElementById('NewsSource').value,
+                categoryID: parseInt(document.getElementById('CategoryID').value),
+                newsStatus: document.getElementById('NewsStatus').checked,
+                newsTags: selectedTags
+            };
+
+            const url = isEditMode ? '/NewsArticles/Update' : '/NewsArticles/Create';
+            const method = isEditMode ? 'PUT' : 'POST';
+
+            $.ajax({
+                url: url,
+                type: method,
+                contentType: 'application/json',
+                data: JSON.stringify(data),
+                success: function (res) {
+                    modal.hide();
+                    Swal.fire('Success', res.message, 'success').then(() => location.reload());
+                },
+                error: function (err) {
+                    Swal.fire('Error', err.responseText || 'An error occurred', 'error');
+                }
+            });
+        }
+
+        function deleteArticle(id) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '/NewsArticles/Delete/' + id,
+                        type: 'DELETE',
+                        success: function (res) {
+                            Swal.fire('Deleted!', res.message, 'success').then(() => location.reload());
+                        },
+                        error: function (err) {
+                            Swal.fire('Error', err.responseJSON?.message || 'Failed to delete article', 'error');
+                        }
+                    });
+                }
+            })
+        }
+    </script>
+}

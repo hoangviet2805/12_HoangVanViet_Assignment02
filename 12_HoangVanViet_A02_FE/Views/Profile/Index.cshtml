@@ -1,0 +1,68 @@
+@model _12_HoangVanViet_A02_FE.Models.SystemAccount
+
+@{
+    ViewData["Title"] = "My Profile";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">My Profile</h4>
+                </div>
+                <div class="card-body">
+                    <form id="profileForm">
+                        <input type="hidden" id="AccountID" value="@Model.AccountID" />
+                        <div class="mb-3">
+                            <label class="form-label">Email (Readonly)</label>
+                            <input type="email" class="form-control" id="AccountEmail" value="@Model.AccountEmail" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Name</label>
+                            <input type="text" class="form-control" id="AccountName" value="@Model.AccountName" required maxlength="100">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Password</label>
+                            <input type="password" class="form-control" id="AccountPassword" value="@Model.AccountPassword" required maxlength="70">
+                        </div>
+                        <div class="d-grid">
+                            <button type="button" class="btn btn-primary" onclick="updateProfile()">Update Profile</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function updateProfile() {
+            if(!document.getElementById('profileForm').checkValidity()){
+                document.getElementById('profileForm').reportValidity();
+                return;
+            }
+
+            const data = {
+                accountID: parseInt(document.getElementById('AccountID').value),
+                accountName: document.getElementById('AccountName').value,
+                accountEmail: document.getElementById('AccountEmail').value,
+                accountPassword: document.getElementById('AccountPassword').value
+            };
+
+            $.ajax({
+                url: '/Profile/Update',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(data),
+                success: function (res) {
+                    Swal.fire('Success', res.message, 'success');
+                },
+                error: function (err) {
+                    Swal.fire('Error', err.responseText || 'An error occurred', 'error');
+                }
+            });
+        }
+    </script>
+}

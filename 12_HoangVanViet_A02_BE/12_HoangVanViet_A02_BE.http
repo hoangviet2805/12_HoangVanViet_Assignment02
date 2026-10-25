@@ -1,0 +1,6 @@
+@_12_HoangVanViet_A02_BE_HostAddress = http://localhost:5038
+
+GET {{_12_HoangVanViet_A02_BE_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

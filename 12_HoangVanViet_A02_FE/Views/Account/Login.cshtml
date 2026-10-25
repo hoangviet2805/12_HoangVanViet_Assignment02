@@ -1,0 +1,46 @@
+@{
+    ViewData["Title"] = "Login";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-4">
+            <div class="card border-0 shadow-lg rounded-4 overflow-hidden" style="border: 1px solid #e5e7eb !important;">
+                <div class="card-body p-4 p-md-5">
+                    <div class="text-center mb-4">
+                        <i class="bi bi-person-circle display-4 text-primary mb-3"></i>
+                        <h3 class="fw-bold text-dark" style="letter-spacing: -0.5px;">Welcome Back</h3>
+                        <p class="text-muted" style="font-size: 0.9rem;">Sign in to access your account</p>
+                    </div>
+
+                    @if (ViewBag.Error != null)
+                    {
+                        <div class="alert alert-danger rounded-3 py-2 px-3 fw-medium" style="font-size: 0.85rem;" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i> @ViewBag.Error
+                        </div>
+                    }
+
+                    <form method="post" action="/Account/Login">
+                        <div class="mb-3">
+                            <label class="form-label text-secondary fw-medium fs-6">Email Address</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white text-muted" style="border-color: #d1d5db;"><i class="bi bi-envelope"></i></span>
+                                <input type="email" name="email" class="form-control shadow-none" required style="border-color: #d1d5db; padding: 0.6rem 0.75rem;" placeholder="name@example.com" />
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label text-secondary fw-medium fs-6">Password</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white text-muted" style="border-color: #d1d5db;"><i class="bi bi-lock"></i></span>
+                                <input type="password" name="password" class="form-control shadow-none" required style="border-color: #d1d5db; padding: 0.6rem 0.75rem;" placeholder="••••••••" />
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 rounded-3 shadow-sm fw-medium d-flex align-items-center justify-content-center gap-2" style="background-color: #4f46e5; border-color: #4f46e5; height: 45px; font-size: 1rem;">
+                            Login <i class="bi bi-box-arrow-in-right"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

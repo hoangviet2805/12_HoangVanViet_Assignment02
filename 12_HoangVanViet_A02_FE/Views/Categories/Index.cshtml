@@ -1,0 +1,177 @@
+@model IEnumerable<_12_HoangVanViet_A02_FE.Models.Category>
+
+@{
+    ViewData["Title"] = "Manage Categories";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Manage Categories</h2>
+    <button class="btn btn-success" onclick="openCreateModal()">
+        <i class="bi bi-plus-circle"></i> Create New Category
+    </button>
+</div>
+
+<table class="table table-striped table-hover mt-4">
+    <thead class="table-dark">
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Active</th>
+            <th class="text-center">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null && Model.Any())
+        {
+            foreach (var category in Model)
+            {
+                <tr>
+                    <td>@category.CategoryID</td>
+                    <td>@category.CategoryName</td>
+                    <td>@category.CategoryDesciption</td>
+                    <td>
+                        @if (category.IsActive == true)
+                        {
+                            <span class="badge bg-success">Active</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">Inactive</span>
+                        }
+                    </td>
+                    <td class="text-center">
+                        <button class="btn btn-sm btn-primary" onclick="openEditModal(@category.CategoryID)">Edit</button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteCategory(@category.CategoryID)">Delete</button>
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="5" class="text-center">No categories found.</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<!-- Category Modal -->
+<div class="modal fade" id="categoryModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalTitle">Create Category</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="categoryForm">
+            <input type="hidden" id="CategoryID" />
+            <div class="mb-3">
+                <label class="form-label">Name</label>
+                <input type="text" class="form-control" id="CategoryName" required maxlength="100">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Description</label>
+                <input type="text" class="form-control" id="CategoryDescription" required maxlength="250">
+            </div>
+            <div class="mb-3 form-check">
+                <input type="checkbox" class="form-check-input" id="IsActive">
+                <label class="form-check-label">Is Active</label>
+            </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" onclick="saveCategory()">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+@section Scripts {
+    <script>
+        let isEditMode = false;
+        const modal = new bootstrap.Modal(document.getElementById('categoryModal'));
+
+        function openCreateModal() {
+            isEditMode = false;
+            document.getElementById('modalTitle').innerText = 'Create Category';
+            document.getElementById('categoryForm').reset();
+            document.getElementById('CategoryID').value = '0';
+            document.getElementById('IsActive').checked = true;
+            modal.show();
+        }
+
+        function openEditModal(id) {
+            isEditMode = true;
+            document.getElementById('modalTitle').innerText = 'Edit Category';
+            
+            $.get('/Categories/GetCategory/' + id, function (data) {
+                document.getElementById('CategoryID').value = data.categoryID;
+                document.getElementById('CategoryName').value = data.categoryName;
+                document.getElementById('CategoryDescription').value = data.categoryDesciption;
+                document.getElementById('IsActive').checked = data.isActive;
+                modal.show();
+            }).fail(function() {
+                Swal.fire('Error', 'Could not load category data', 'error');
+            });
+        }
+
+        function saveCategory() {
+            if(!document.getElementById('categoryForm').checkValidity()){
+                document.getElementById('categoryForm').reportValidity();
+                return;
+            }
+
+            const data = {
+                categoryID: parseInt(document.getElementById('CategoryID').value),
+                categoryName: document.getElementById('CategoryName').value,
+                categoryDesciption: document.getElementById('CategoryDescription').value,
+                isActive: document.getElementById('IsActive').checked
+            };
+
+            const url = isEditMode ? '/Categories/Update' : '/Categories/Create';
+            const method = isEditMode ? 'PUT' : 'POST';
+
+            $.ajax({
+                url: url,
+                type: method,
+                contentType: 'application/json',
+                data: JSON.stringify(data),
+                success: function (res) {
+                    modal.hide();
+                    Swal.fire('Success', res.message, 'success').then(() => location.reload());
+                },
+                error: function (err) {
+                    Swal.fire('Error', err.responseText || 'An error occurred', 'error');
+                }
+            });
+        }
+
+        function deleteCategory(id) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '/Categories/Delete/' + id,
+                        type: 'DELETE',
+                        success: function (res) {
+                            Swal.fire('Deleted!', res.message, 'success').then(() => location.reload());
+                        },
+                        error: function (err) {
+                            Swal.fire('Error', err.responseJSON?.message || 'Failed to delete category', 'error');
+                        }
+                    });
+                }
+            })
+        }
+    </script>
+}
