@@ -6,19 +6,26 @@ using System.Text.Json;
 
 namespace _12_HoangVanViet_A02_FE.Controllers
 {
+    /// <summary>
+    /// Controller quản lý việc Đăng nhập, Đăng xuất và lưu trữ Phiên người dùng (Session) trên Frontend
+    /// </summary>
     public class AccountController : Controller
     {
         private readonly ApiService _apiService;
 
+        // Constructor Injection: Tiêm ApiService để gọi API Backend
         public AccountController(ApiService apiService)
         {
             _apiService = apiService;
         }
 
+        /// <summary>
+        /// Hiển thị màn hình Đăng nhập (GET: /Account/Login)
+        /// - Nếu trong Session đã có token (người dùng đã đăng nhập trước đó) thì điều hướng thẳng về Trang chủ.
+        /// </summary>
         [HttpGet]
         public IActionResult Login()
         {
-            // If already logged in, redirect to home
             if (!string.IsNullOrEmpty(HttpContext.Session.GetString("JWToken")))
             {
                 return RedirectToAction("Index", "Home");
@@ -26,6 +33,18 @@ namespace _12_HoangVanViet_A02_FE.Controllers
             return View();
         }
 
+        /// <summary>
+        /// Xử lý Submit Form Đăng nhập (POST: /Account/Login)
+        /// - Nhận email và password từ Form view.
+        /// - Gọi ApiService.LoginAsync() để xác thực với Backend API.
+        /// - Nếu thành công:
+        ///     1. Lưu chuỗi JWT Token vào Session["JWToken"].
+        ///     2. Lưu Role và tên tài khoản vào Session để phân quyền hiển thị Menu.
+        ///     3. Điều hướng người dùng về đúng trang theo vai trò:
+        ///        + Admin -> Quản lý tài khoản (/SystemAccounts)
+        ///        + Staff -> Quản lý bài viết (/NewsArticles)
+        ///        + Lecturer -> Trang hồ sơ cá nhân (/Profile)
+        /// </summary>
         [HttpPost]
         public async Task<IActionResult> Login(string email, string password)
         {
@@ -48,6 +67,7 @@ namespace _12_HoangVanViet_A02_FE.Controllers
                     _ => "User"
                 };
 
+                // Lưu các thông tin bảo mật vào Session của ứng dụng MVC
                 HttpContext.Session.SetString("JWToken", result.Token);
                 HttpContext.Session.SetString("User", JsonSerializer.Serialize(account));
                 HttpContext.Session.SetInt32("Role", role);
@@ -55,6 +75,7 @@ namespace _12_HoangVanViet_A02_FE.Controllers
                 HttpContext.Session.SetInt32("AccountId", account.AccountID);
                 HttpContext.Session.SetString("AccountName", account.AccountName ?? "User");
 
+                // Điều hướng theo đúng vai trò người dùng
                 if (roleName == "Admin")
                 {
                     return RedirectToAction("Index", "SystemAccounts");
@@ -74,6 +95,11 @@ namespace _12_HoangVanViet_A02_FE.Controllers
             return View();
         }
 
+        /// <summary>
+        /// Xử lý Đăng xuất (GET: /Account/Logout)
+        /// - Xóa sạch toàn bộ dữ liệu Session hiện tại (Token, Role, User).
+        /// - Điều hướng người dùng quay lại màn hình Login.
+        /// </summary>
         public IActionResult Logout()
         {
             HttpContext.Session.Clear();

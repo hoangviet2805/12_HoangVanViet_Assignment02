@@ -10,6 +10,12 @@ using System.Text.Json;
 
 namespace _12_HoangVanViet_A02_FE.Services
 {
+    /// <summary>
+    /// Service trung tâm quản lý toàn bộ việc gọi HTTP API sang Backend
+    /// - Sử dụng HttpClient tiêm qua Dependency Injection.
+    /// - Tự động đính kèm JWT Token vào Header của mỗi Request.
+    /// - Xử lý bóc tách định dạng dữ liệu trả về từ Web API và OData.
+    /// </summary>
     public class ApiService
     {
         private readonly HttpClient _httpClient;
@@ -23,6 +29,10 @@ namespace _12_HoangVanViet_A02_FE.Services
             _httpContextAccessor = httpContextAccessor;
         }
 
+        /// <summary>
+        /// Hàm nội bộ: Tự động trích xuất chuỗi JWT Token từ HttpContext.Session của người dùng
+        /// và gắn vào Request Header: "Authorization: Bearer <token>" trước khi gửi sang Backend.
+        /// </summary>
         private void AttachAuthToken()
         {
             var token = _httpContextAccessor.HttpContext?.Session.GetString("JWToken");
@@ -36,6 +46,10 @@ namespace _12_HoangVanViet_A02_FE.Services
             }
         }
 
+        /// <summary>
+        /// Gọi API Đăng nhập sang Backend (POST: /api/Auth/login)
+        /// - Nhận về Token và thông tin User nếu thành công.
+        /// </summary>
         public async Task<LoginResponse?> LoginAsync(string email, string password)
         {
             var response = await _httpClient.PostAsJsonAsync($"{_baseUrl}api/Auth/login", new { Email = email, Password = password });
@@ -48,6 +62,11 @@ namespace _12_HoangVanViet_A02_FE.Services
         }
 
         // --- Categories ---
+
+        /// <summary>
+        /// Lấy danh sách danh mục qua OData (/odata/Categories)
+        /// - Có cơ chế thông minh: Kiểm tra nếu OData trả về bọc trong thuộc tính {"value": [...]} thì bóc tách lấy mảng bên trong.
+        /// </summary>
         public async Task<List<Category>> GetCategoriesAsync()
         {
             AttachAuthToken();
@@ -193,6 +212,10 @@ namespace _12_HoangVanViet_A02_FE.Services
         }
 
         // --- News Articles ---
+
+        /// <summary>
+        /// Lấy toàn bộ bài viết (Dành cho Staff/Admin)
+        /// </summary>
         public async Task<List<NewsArticle>> GetNewsArticlesAsync()
         {
             AttachAuthToken();
@@ -204,9 +227,12 @@ namespace _12_HoangVanViet_A02_FE.Services
             return new List<NewsArticle>();
         }
 
+        /// <summary>
+        /// Lấy các bài viết đang kích hoạt (Active) dành cho khách xem trang chủ (Không cần gắn Token)
+        /// </summary>
         public async Task<List<NewsArticle>> GetActiveNewsArticlesAsync()
         {
-            // Public endpoint: does not require token
+            // Endpoint công khai: không cần đính kèm Bearer token
             var response = await _httpClient.GetAsync($"{_baseUrl}api/NewsArticles/active");
             if (response.IsSuccessStatusCode)
             {
@@ -215,6 +241,9 @@ namespace _12_HoangVanViet_A02_FE.Services
             return new List<NewsArticle>();
         }
 
+        /// <summary>
+        /// Lấy lịch sử các bài viết do 1 tác giả cụ thể tạo (Dành cho trang quản lý của Staff)
+        /// </summary>
         public async Task<List<NewsArticle>> GetNewsHistoryAsync(short authorId)
         {
             AttachAuthToken();
@@ -226,6 +255,9 @@ namespace _12_HoangVanViet_A02_FE.Services
             return new List<NewsArticle>();
         }
 
+        /// <summary>
+        /// Lấy chi tiết bài viết theo ID
+        /// </summary>
         public async Task<NewsArticle?> GetNewsArticleByIdAsync(string id)
         {
             AttachAuthToken();
@@ -237,6 +269,9 @@ namespace _12_HoangVanViet_A02_FE.Services
             return null;
         }
 
+        /// <summary>
+        /// Tạo mới bài viết: Gắn Token và bắn HTTP POST sang Backend
+        /// </summary>
         public async Task<bool> CreateNewsArticleAsync(NewsArticle article)
         {
             AttachAuthToken();
@@ -244,6 +279,9 @@ namespace _12_HoangVanViet_A02_FE.Services
             return response.IsSuccessStatusCode;
         }
 
+        /// <summary>
+        /// Cập nhật bài viết: Gắn Token và bắn HTTP PUT sang Backend
+        /// </summary>
         public async Task<bool> UpdateNewsArticleAsync(NewsArticle article)
         {
             AttachAuthToken();
@@ -251,6 +289,9 @@ namespace _12_HoangVanViet_A02_FE.Services
             return response.IsSuccessStatusCode;
         }
 
+        /// <summary>
+        /// Xóa bài viết: Gắn Token và bắn HTTP DELETE sang Backend
+        /// </summary>
         public async Task<bool> DeleteNewsArticleAsync(string id)
         {
             AttachAuthToken();
@@ -259,6 +300,10 @@ namespace _12_HoangVanViet_A02_FE.Services
         }
 
         // --- Reports ---
+
+        /// <summary>
+        /// Lấy danh sách thống kê bài viết theo khoảng ngày (Dành cho Admin)
+        /// </summary>
         public async Task<List<NewsArticle>> GetStatisticsAsync(System.DateTime startDate, System.DateTime endDate)
         {
             AttachAuthToken();
@@ -271,6 +316,10 @@ namespace _12_HoangVanViet_A02_FE.Services
         }
 
         // --- Tags ---
+
+        /// <summary>
+        /// Lấy danh sách toàn bộ các Tag bài viết
+        /// </summary>
         public async Task<List<Tag>> GetTagsAsync()
         {
             AttachAuthToken();
