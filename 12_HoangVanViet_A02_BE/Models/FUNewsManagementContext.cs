@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 
 namespace _12_HoangVanViet_A02_BE.Models
 {
@@ -19,18 +18,6 @@ namespace _12_HoangVanViet_A02_BE.Models
         public virtual DbSet<NewsTag> NewsTags { get; set; } = null!;
         public virtual DbSet<SystemAccount> SystemAccounts { get; set; } = null!;
         public virtual DbSet<Tag> Tags { get; set; } = null!;
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            if (!optionsBuilder.IsConfigured)
-            {
-                var builder = new ConfigurationBuilder()
-                                  .SetBasePath(Directory.GetCurrentDirectory())
-                                  .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
-                IConfigurationRoot configuration = builder.Build();
-                optionsBuilder.UseSqlServer(configuration.GetConnectionString("MyCnn"));
-            }
-        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

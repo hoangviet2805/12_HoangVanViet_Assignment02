@@ -1,16 +1,65 @@
+using System;
 using System.Collections.Generic;
-using _12_HoangVanViet_A02_BE.DAOs;
+using System.Linq;
+using Microsoft.EntityFrameworkCore;
 using _12_HoangVanViet_A02_BE.Models;
 
 namespace _12_HoangVanViet_A02_BE.Repositories
 {
     public class NewsArticleRepository : INewsArticleRepository
     {
-        public void AddNewsArticle(NewsArticle article) => NewsArticleDAO.Instance.AddNewsArticle(article);
-        public void DeleteNewsArticle(NewsArticle article) => NewsArticleDAO.Instance.DeleteNewsArticle(article);
-        public NewsArticle? GetNewsArticleById(string id) => NewsArticleDAO.Instance.GetNewsArticleById(id);
-        public IEnumerable<NewsArticle> GetNewsArticles() => NewsArticleDAO.Instance.GetNewsArticles();
-        public void UpdateNewsArticle(NewsArticle article) => NewsArticleDAO.Instance.UpdateNewsArticle(article);
-        public IEnumerable<NewsArticle> GetStatistics(System.DateTime startDate, System.DateTime endDate) => NewsArticleDAO.Instance.GetStatistics(startDate, endDate);
+        private readonly FUNewsManagementContext _context;
+
+        public NewsArticleRepository(FUNewsManagementContext context)
+        {
+            _context = context;
+        }
+
+        public IEnumerable<NewsArticle> GetNewsArticles()
+        {
+            return _context.NewsArticles
+                .Include(n => n.Category)
+                .Include(n => n.CreatedBy)
+                .Include(n => n.NewsTags).ThenInclude(nt => nt.Tag)
+                .ToList();
+        }
+
+        public NewsArticle? GetNewsArticleById(string id)
+        {
+            return _context.NewsArticles
+                .Include(n => n.Category)
+                .Include(n => n.CreatedBy)
+                .Include(n => n.NewsTags).ThenInclude(nt => nt.Tag)
+                .FirstOrDefault(c => c.NewsArticleID == id);
+        }
+
+        public void AddNewsArticle(NewsArticle article)
+        {
+            _context.NewsArticles.Add(article);
+            _context.SaveChanges();
+        }
+
+        public void UpdateNewsArticle(NewsArticle article)
+        {
+            _context.NewsArticles.Update(article);
+            _context.SaveChanges();
+        }
+
+        public void DeleteNewsArticle(NewsArticle article)
+        {
+            _context.NewsArticles.Remove(article);
+            _context.SaveChanges();
+        }
+
+        public IEnumerable<NewsArticle> GetStatistics(DateTime startDate, DateTime endDate)
+        {
+            return _context.NewsArticles
+                .Include(n => n.Category)
+                .Include(n => n.CreatedBy)
+                .Include(n => n.NewsTags).ThenInclude(nt => nt.Tag)
+                .Where(n => n.CreatedDate >= startDate && n.CreatedDate <= endDate)
+                .OrderByDescending(n => n.CreatedDate)
+                .ToList();
+        }
     }
 }

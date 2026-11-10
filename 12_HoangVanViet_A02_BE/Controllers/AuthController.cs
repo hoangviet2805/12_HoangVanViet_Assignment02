@@ -58,6 +58,7 @@ namespace _12_HoangVanViet_A02_BE.Controllers
                 var token = GenerateJwtToken(adminAccount, "Admin");
                 return Ok(new
                 {
+                    //Message = "Chúc mừng bạn đã đăng nhập thành công!",
                     Token = token,
                     TokenType = "Bearer",
                     Account = adminAccount
@@ -80,6 +81,7 @@ namespace _12_HoangVanViet_A02_BE.Controllers
                 var token = GenerateJwtToken(account, roleName);
                 return Ok(new
                 {
+                    //Message = $"Chúc mừng {account.AccountName} đã đăng nhập thành công!",
                     Token = token,
                     TokenType = "Bearer",
                     Account = account
