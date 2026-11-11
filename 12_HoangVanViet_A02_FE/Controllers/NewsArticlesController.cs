@@ -84,7 +84,7 @@ namespace _12_HoangVanViet_A02_FE.Controllers
             
             bool success = await _apiService.CreateNewsArticleAsync(article);
             if (success) return Ok(new { message = "Article created successfully" });
-            return StatusCode(500, "Error creating article");
+            return BadRequest(new { message = "Error creating article" });
         }
 
         /// <summary>
@@ -104,7 +104,7 @@ namespace _12_HoangVanViet_A02_FE.Controllers
             
             bool success = await _apiService.UpdateNewsArticleAsync(article);
             if (success) return Ok(new { message = "Article updated successfully" });
-            return StatusCode(500, "Error updating article");
+            return BadRequest(new { message = "Error updating article" });
         }
 
         /// <summary>

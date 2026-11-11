@@ -93,8 +93,15 @@ namespace _12_HoangVanViet_A02_BE.Controllers
             {
                 return NotFound();
             }
-            _repository.DeleteTag(tag);
-            return NoContent();
+            try
+            {
+                _repository.DeleteTag(tag);
+                return NoContent();
+            }
+            catch (System.InvalidOperationException ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
         }
     }
 }

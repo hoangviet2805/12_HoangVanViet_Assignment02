@@ -31,6 +31,11 @@ namespace _12_HoangVanViet_A02_BE.Repositories
 
         public void DeleteTag(Tag tag)
         {
+            bool hasArticles = _context.NewsTags.Any(nt => nt.TagID == tag.TagID);
+            if (hasArticles)
+            {
+                throw new System.InvalidOperationException("Cannot delete tag because it is used in news articles.");
+            }
             _context.Tags.Remove(tag);
             _context.SaveChanges();
         }

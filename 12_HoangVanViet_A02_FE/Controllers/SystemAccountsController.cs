@@ -42,7 +42,7 @@ namespace _12_HoangVanViet_A02_FE.Controllers
             
             bool success = await _apiService.CreateAccountAsync(account);
             if (success) return Ok(new { message = "Account created successfully" });
-            return StatusCode(500, "Error creating account");
+            return BadRequest(new { message = "Error creating account" });
         }
 
         [HttpPut]
@@ -53,7 +53,7 @@ namespace _12_HoangVanViet_A02_FE.Controllers
             
             bool success = await _apiService.UpdateAccountAsync(account);
             if (success) return Ok(new { message = "Account updated successfully" });
-            return StatusCode(500, "Error updating account");
+            return BadRequest(new { message = "Error updating account" });
         }
 
         [HttpDelete]

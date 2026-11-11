@@ -1,4 +1,4 @@
-using _12_HoangVanViet_A02_BE.Models;
+﻿using _12_HoangVanViet_A02_BE.Models;
 using _12_HoangVanViet_A02_BE.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.OData;
@@ -34,6 +34,7 @@ var secretKey = jwtSettings["Key"] ?? "FUNewsManagementSystem_Secret_Key_For_PRN
 var issuer = jwtSettings["Issuer"] ?? "FUNewsManagementServer";
 var audience = jwtSettings["Audience"] ?? "FUNewsManagementClient";
 
+// 1
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -55,6 +56,9 @@ builder.Services.AddAuthentication(options =>
         ClockSkew = TimeSpan.Zero
     };
 });
+
+
+//2
 
 builder.Services.AddAuthorization();
 

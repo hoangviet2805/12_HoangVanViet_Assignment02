@@ -47,7 +47,7 @@ namespace _12_HoangVanViet_A02_FE.Controllers
             
             bool success = await _apiService.CreateCategoryAsync(category);
             if (success) return Ok(new { message = "Category created successfully" });
-            return StatusCode(500, "Error creating category");
+            return BadRequest(new { message = "Error creating category" });
         }
 
         [HttpPut]
@@ -59,7 +59,7 @@ namespace _12_HoangVanViet_A02_FE.Controllers
             
             bool success = await _apiService.UpdateCategoryAsync(category);
             if (success) return Ok(new { message = "Category updated successfully" });
-            return StatusCode(500, "Error updating category");
+            return BadRequest(new { message = "Error updating category" });
         }
 
         [HttpDelete]

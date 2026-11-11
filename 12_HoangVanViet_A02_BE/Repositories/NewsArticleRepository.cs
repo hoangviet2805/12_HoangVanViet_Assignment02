@@ -47,6 +47,8 @@ namespace _12_HoangVanViet_A02_BE.Repositories
 
         public void DeleteNewsArticle(NewsArticle article)
         {
+            var tags = _context.NewsTags.Where(nt => nt.NewsArticleID == article.NewsArticleID);
+            _context.NewsTags.RemoveRange(tags);
             _context.NewsArticles.Remove(article);
             _context.SaveChanges();
         }

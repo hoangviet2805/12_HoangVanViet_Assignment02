@@ -22,6 +22,11 @@ namespace _12_HoangVanViet_A02_BE.Repositories
 
         public void AddAccount(SystemAccount account)
         {
+            if (account.AccountID <= 0)
+            {
+                short maxId = _context.SystemAccounts.Any() ? _context.SystemAccounts.Max(a => a.AccountID) : (short)0;
+                account.AccountID = (short)(maxId + 1);
+            }
             _context.SystemAccounts.Add(account);
             _context.SaveChanges();
         }
